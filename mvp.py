@@ -5,26 +5,81 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 
 # Constants
-TEAM_FULL_TO_ABBREV = {
-    "Atlanta Hawks": "ATL", "Boston Celtics": "BOS", "Brooklyn Nets": "BRK", "New Jersey Nets": "BRK",
-    "Charlotte Hornets": "CHO", "Charlotte Bobcats": "CHO", "Chicago Bulls": "CHI", "Cleveland Cavaliers": "CLE",
-    "Dallas Mavericks": "DAL", "Denver Nuggets": "DEN", "Detroit Pistons": "DET", "Golden State Warriors": "GSW",
-    "Houston Rockets": "HOU", "Indiana Pacers": "IND", "Los Angeles Clippers": "LAC", "Los Angeles Lakers": "LAL",
-    "Memphis Grizzlies": "MEM", "Miami Heat": "MIA", "Milwaukee Bucks": "MIL", "Minnesota Timberwolves": "MIN",
-    "New Orleans Pelicans": "NOP", "New Orleans Hornets": "NOP", "New York Knicks": "NYK", "Oklahoma City Thunder": "OKC",
-    "Orlando Magic": "ORL", "Philadelphia 76ers": "PHI", "Phoenix Suns": "PHO", "Portland Trail Blazers": "POR",
-    "Sacramento Kings": "SAC", "San Antonio Spurs": "SAS", "Toronto Raptors": "TOR", "Utah Jazz": "UTA",
-    "Washington Wizards": "WAS"
-}
-
 TEAM_ABBREV_MAPPING = {
+    # Relocated Franchises
+    "KCK": "SAC", 
+    "SDC": "LAC", 
+    "SEA": "OKC", 
+    "NJN": "BKN",
+    "BRK": "BKN",
+    
+    # Name Changes
+    "WSB": "WAS", 
+    
+    # The Hornets/Pelicans
+    "CHH": "NOP",
     "NOH": "NOP",
-    "CHA": "CHO",
+    "NOK": "NOP", 
+    
+    # Expansion Charlotte Franchise
+    "CHA": "CHO", 
+    "CHX": "CHO"
 }
 
 STATS_COLUMNS = ["G", "MP", "PTS", "TRB", "AST", "STL", "BLK", "FG%", "3P%", "FT%", "WS", "W/L%"]
 
 # Helper Functions
+def get_team_abbrev(team_name, season):
+    """
+    Returns the 3-letter abbreviation based on Team Name and Season.
+    Handles the Charlotte Hornets split history.
+    """
+    
+    # 1. Special Case: Charlotte Hornets
+    if team_name == "Charlotte Hornets":
+        # The original Hornets played in Charlotte until the 2001-02 season (2002)
+        if season <= 2002:
+            # Maps to Pelicans lineage
+            return "NOP" 
+        else:
+            # Maps to current Hornets lineage (post-2014)
+            return "CHO" 
+
+    static_map = {
+        "Atlanta Hawks": "ATL",
+        "Boston Celtics": "BOS",
+        "Brooklyn Nets": "BRK", "New Jersey Nets": "BRK",
+        "Charlotte Bobcats": "CHO", 
+        "Chicago Bulls": "CHI",
+        "Cleveland Cavaliers": "CLE",
+        "Dallas Mavericks": "DAL",
+        "Denver Nuggets": "DEN",
+        "Detroit Pistons": "DET",
+        "Golden State Warriors": "GSW",
+        "Houston Rockets": "HOU",
+        "Indiana Pacers": "IND",
+        "Los Angeles Clippers": "LAC", "San Diego Clippers": "LAC",
+        "Los Angeles Lakers": "LAL",
+        "Memphis Grizzlies": "MEM", "Vancouver Grizzlies": "MEM",
+        "Miami Heat": "MIA",
+        "Milwaukee Bucks": "MIL",
+        "Minnesota Timberwolves": "MIN",
+        "New Orleans Pelicans": "NOP", "New Orleans Hornets": "NOP", "New Orleans/Oklahoma City Hornets": "NOP",
+        "New York Knicks": "NYK",
+        "Oklahoma City Thunder": "OKC", "Seattle SuperSonics": "OKC",
+        "Orlando Magic": "ORL",
+        "Philadelphia 76ers": "PHI",
+        "Phoenix Suns": "PHO",
+        "Portland Trail Blazers": "POR",
+        "Sacramento Kings": "SAC", "Kansas City Kings": "SAC",
+        "San Antonio Spurs": "SAS",
+        "Toronto Raptors": "TOR",
+        "Utah Jazz": "UTA",
+        "Washington Wizards": "WAS", "Washington Bullets": "WAS"
+    }
+    
+    return static_map.get(team_name, "UNK") # Returns "UNK" if not found
+
 def get_season_games(season):
     """Returns the number of games in a specific season to handle shortened seasons."""
     year = int(season.split("-")[1])
@@ -91,7 +146,10 @@ def preprocess_historical_data(mvp_path, standings_path):
 
     # 2. Clean Standings Data
     standings_df = standings_df.drop(columns=["W", "L", "PS/G", "PA/G", "SRS", "GB", "Conference"], errors='ignore')
-    standings_df['Team'] = standings_df['Team'].map(TEAM_FULL_TO_ABBREV)
+    standings_df['Team'] = standings_df.apply(
+        lambda row: get_team_abbrev(row['Team'], row['Season']), axis=1
+    )
+    mvp_df['Season'] = mvp_df['Season'].astype(str).apply(lambda x: int(x.split('-')[0]) + 1)
 
     # 3. Merge Datasets
     final_df = pd.merge(mvp_df, standings_df, on=["Season", "Team"], how='left')
@@ -103,7 +161,7 @@ def preprocess_historical_data(mvp_path, standings_path):
     
     return X, y
 
-def preprocess_current_season_data(per_game_path, advanced_path, standings_path):
+def preprocess_current_season_data(per_game_path, advanced_path, standings_path, current_year = 2026):
     """Loads and cleans the test data (Current Season)."""
     print("Loading current season data...")
     test_df = pd.read_csv(per_game_path)
@@ -116,8 +174,23 @@ def preprocess_current_season_data(per_game_path, advanced_path, standings_path)
     # Merge with Standings (for W/L%)
     standings_df = pd.read_csv(standings_path)
     standings_df = standings_df[["Team", "W/L%"]]
-    standings_df['Team'] = standings_df['Team'].map(TEAM_FULL_TO_ABBREV)
+    standings_df['Team'] = standings_df.apply(
+        lambda row: get_team_abbrev(row['Team'], current_year), axis=1
+    )
     test_df = pd.merge(test_df, standings_df, on="Team", how="left")
+
+    # Restrict test dataset    
+    avg_pts = test_df['PTS'].mean()
+    avg_ws = test_df['WS'].mean()
+
+    # Filter by 65-Game Rule 
+    max_games_played = test_df['G'].max()
+    min_games_required = max_games_played * (65/82)    
+    test_df = test_df[test_df['G'] >= min_games_required]
+    test_df = test_df[
+        (test_df["W/L%"] > 0.400) & 
+        ((test_df["PTS"] > avg_pts) | (test_df["WS"] > avg_ws))
+    ]
     
     # Keep identification columns for final output, but separate features
     player_info = test_df[["Player", "Team"]]
@@ -135,8 +208,8 @@ def preprocess_current_season_data(per_game_path, advanced_path, standings_path)
 def main():
     # 1. Load Data
     X_train, y_train = preprocess_historical_data(
-        "data/nba_mvp_voting_2010_to_2025.csv",
-        "data/nba_standings_2010_to_2025.csv"
+        "data/nba_mvp_voting_1980_to_2025.csv",
+        "data/nba_standings_1980_to_2025.csv"
     )
     
     X_test, player_info = preprocess_current_season_data(
