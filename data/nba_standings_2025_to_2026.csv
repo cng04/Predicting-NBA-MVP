@@ -1,0 +1,31 @@
+Conference,Seed,Team,W,L,W/L%,GB,PS/G,PA/G,SRS
+Eastern,1,Detroit Pistons,15,2,.882,—,119.6,112.6,4.64
+Eastern,2,Toronto Raptors,13,5,.722,2.5,120.4,113.4,5.36
+Eastern,3,Miami Heat,12,6,.667,3.5,123.9,117.9,7.04
+Eastern,4,Cleveland Cavaliers,12,7,.632,4.0,118.8,114.8,4.46
+Eastern,5,New York Knicks,10,6,.625,4.5,120.3,115.1,5.05
+Eastern,6,Atlanta Hawks,11,8,.579,5.0,117.1,115.3,1.01
+Eastern,7,Orlando Magic,11,8,.579,5.0,119.6,114.3,6.19
+Eastern,8,Chicago Bulls,9,8,.529,6.0,121.3,124.2,-2.30
+Eastern,9,Philadelphia 76ers,9,8,.529,6.0,117.4,118.4,0.18
+Eastern,10,Boston Celtics,9,8,.529,6.0,114.6,110.0,4.18
+Eastern,11,Milwaukee Bucks,8,10,.444,7.5,116.5,119.3,-3.18
+Eastern,12,Charlotte Hornets,4,13,.235,11.0,116.2,120.4,-5.19
+Eastern,13,Brooklyn Nets,3,14,.176,12.0,109.2,119.7,-8.35
+Eastern,14,Indiana Pacers,2,15,.118,13.0,110.5,122.8,-11.61
+Eastern,15,Washington Wizards,2,15,.118,13.0,114.1,128.2,-12.59
+Western,1,Oklahoma City Thunder,17,1,.944,—,122.6,105.7,12.67
+Western,2,Los Angeles Lakers,13,4,.765,3.5,118.3,114.8,2.48
+Western,3,Denver Nuggets,13,4,.765,3.5,123.8,113.8,7.83
+Western,4,Houston Rockets,11,4,.733,4.5,122.3,111.1,12.38
+Western,5,San Antonio Spurs,11,5,.688,5.0,118.3,112.2,5.22
+Western,6,Phoenix Suns,11,7,.611,6.0,117.1,113.3,1.92
+Western,7,Minnesota Timberwolves,10,7,.588,6.5,119.6,114.2,2.19
+Western,8,Golden State Warriors,10,9,.526,7.5,115.8,115.0,0.72
+Western,9,Portland Trail Blazers,8,10,.444,9.0,119.3,121.4,-0.07
+Western,10,Memphis Grizzlies,6,12,.333,11.0,112.3,116.9,-2.90
+Western,11,Utah Jazz,5,12,.294,11.5,118.1,125.5,-7.20
+Western,12,Sacramento Kings,5,13,.278,12.0,112.3,123.7,-7.84
+Western,13,Los Angeles Clippers,5,13,.278,12.0,112.2,118.2,-4.73
+Western,14,Dallas Mavericks,5,14,.263,12.5,109.5,115.5,-6.64
+Western,15,New Orleans Pelicans,3,15,.167,14.0,110.6,121.9,-9.48
